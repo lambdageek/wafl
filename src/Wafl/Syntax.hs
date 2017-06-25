@@ -175,3 +175,12 @@ fnBody kenter = FnBody . flip bind kenter . ContDefs . rec
 -- cont k (x:A) (s^L) = m
 cont :: CVar -> Variable -> LVar -> Term -> ContDef
 cont k x s = ContDef . rebind k . embed . Continuation . bind (x, s)
+
+letE :: Expr -> Variable -> Term -> Term
+letE e x = LetE e . bind x
+
+push :: Value -> LinearValue -> LVar -> Term -> Term
+push v lv lv' = Push v lv . bind lv'
+
+pop :: LinearValue -> Variable -> LVar -> Term -> Term
+pop lv x lv' = Pop lv . bind (x, lv')

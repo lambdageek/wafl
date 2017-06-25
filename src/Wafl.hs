@@ -23,19 +23,23 @@ example = program [g1, g2, g3, ev]
           fnBody (cvar "enter")
           [
             cont (cvar "enter") (variable "x") (lvar "s") $
-            Call (fvar "k") (VarV $ variable "x") (VarLV $ lvar "s") (cvar "ret")
+            letE (EOp Add [VarV (variable "x"), IntV (-1)]) (variable "x'") $ 
+            Call (fvar "k") (VarV $ variable "x'") (VarLV $ lvar "s") (cvar "ret")
           ]
     d2 = FunDecl $ funDefn (fvar "k") (cvar "ret") $
          fnBody (cvar "enter")
          [
            cont (cvar "enter") (variable "x")  (lvar "s") $
-           If Leq (VarV $ variable "x") (IntV 0) (cvar "ret0", VarLV $ lvar "s") (cvar "recu", VarLV $ lvar "s")
+           push (VarV (variable "x")) (VarLV $ lvar "s") (lvar "s'") $
+           If Leq (VarV $ variable "x") (IntV 0) (cvar "ret0", VarLV $ lvar "s'") (cvar "recu", VarLV $ lvar "s'")
          , cont (cvar "ret0") (variable "_") (lvar "s") $
-           Jump (cvar "ret") (IntV 0) (VarLV $ lvar "s")
+           pop (VarLV $ lvar "s") (variable "_") (lvar "s'") $
+           Jump (cvar "ret") (IntV 0) (VarLV $ lvar "s'")
          , cont (cvar "recu") (variable "_") (lvar "s") $
-           Call (fvar "h") (VarV $ variable "x") (VarLV $ lvar "s") (cvar "ret")
+           pop (VarLV $ lvar "s") (variable "x") (lvar "s'") $
+           Call (fvar "h") (VarV $ variable "x") (VarLV $ lvar "s'") (cvar "ret")
          ]
-    ev = pragmaEval (fvar "g") (IntV 42)
+    ev = pragmaEval (fvar "h") (IntV 2)
 
 doWafl :: Program -> IO ()
 doWafl p = do
