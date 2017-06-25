@@ -63,6 +63,8 @@ data Result = Done
             | ErrUnboundVariable Variable
             | ErrStackNotEmpty
             | ErrWrongOperands Op
+            | ErrWrongCompare Cmp
+            | ErrUnexpectedEmptyStack LinearValue
             deriving (Show)
 
 initial :: Fresh m => Program -> m (GlobalCmd, ResidualProgram)
@@ -196,8 +198,34 @@ stepTerm (LetE e bnd) = do
   v <- evalExpr e
   lenv <- ask
   return (Right $ Step (addLocal x v lenv) m)
-stepTerm _ = error "finish stepLocal"
+stepTerm (If cmp v1 v2 trueb falseb) = do
+  v1' <- evalValue v1
+  v2' <- evalValue v2
+  case (cmp, v1', v2') of
+    (Leq, IntV n1, IntV n2) -> do
+      let (k, lv) = if n1 <= n2 then trueb else falseb
+      stk <- evalLValue lv
+      return (Right $ Jmp k UnitV stk)
+    _ -> throwError (ErrWrongCompare cmp)
+stepTerm (Push v lv bnd) = do
+  v' <- evalValue v
+  stk <- evalLValue lv
+  let stk' = v':stk
+  (lv', m) <- unbind bnd
+  lenv <- ask
+  return (Right $ Step (setStack lv' stk' lenv) m)
+stepTerm (Pop lv bnd) = do
+  stk <- evalLValue lv
+  case stk of
+    [] -> throwError (ErrUnexpectedEmptyStack lv)
+    (v:stk') -> do
+      ((x, lv'), m) <- unbind bnd
+      lenv <- ask
+      let lenv' = addLocal x v (setStack lv' stk' lenv)
+      return (Right $ Step lenv' m)
 
+setStack :: a -> b -> (c, d) -> (c, (a, b))
+setStack lv v (vs,_lin) = (vs, (lv, v))
 
 evalExpr :: Monad m => Expr -> ExceptT Result (ReaderT LocalEnv m) Value
 evalExpr e =
