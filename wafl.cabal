@@ -1,0 +1,42 @@
+name:                wafl
+version:             0.0.0.0
+synopsis:            Yummy Wafl
+description:         A simple language in ANF
+homepage:            https://github.com/lambdageek/wafl
+license:             MIT
+license-file:        LICENSE
+author:              Aleksey Kliger
+maintainer:          Aleksey Kliger
+category:            Language
+build-type:          Simple
+extra-source-files:  ChangeLog.md
+cabal-version:       >=1.10
+tested-with:         GHC == 8.0.2
+
+library
+  exposed-modules:     Wafl,
+                       Wafl.Syntax,
+                       Wafl.Stepper
+  -- other-modules:       
+  other-extensions:    MultiParamTypeClasses
+  build-depends:       base >=4.9 && < 5,
+                       unbound-generics,
+                       containers >= 0.5.8.2,
+                       mtl >= 2.2.1
+  hs-source-dirs:      src
+  default-language:    Haskell2010
+  ghc-options:         -Wall
+
+-- executable waflr
+--   main-is:             waflr.hs
+--   hs-source-dirs:      main
+--   build-depends:       base >=4.9,
+--                        wafl
+--   default-language:    Haskell2010
+--   other-extensions:    MultiParamTypeClasses
+--   ghc-options:         -Wall
+
+source-repository head
+  type:                git
+  location:            git://github.com/lambdageek/wafl.git
+
