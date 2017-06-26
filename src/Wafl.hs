@@ -2,6 +2,7 @@ module Wafl where
 
 import Wafl.Syntax
 import Wafl.Stepper
+import Wafl.Pretty (display)
 
 import Control.Monad.Except
 import Control.Monad.State.Strict (StateT, runStateT)
