@@ -44,15 +44,15 @@ data Pragma =
                deriving (Show, Generic)
 
 newtype FVar = FVar { fvarName :: Name FVar }
-             deriving (Eq, Show, Generic)
+             deriving (Eq, Ord, Show, Generic)
 
 newtype CVar = CVar {cvarName :: Name CVar }
-             deriving (Eq, Show, Generic)
+             deriving (Eq, Ord, Show, Generic)
 
 type Variable = Name Value
 
 newtype LVar = LVar { lvarName :: Name LVar }
-                  deriving (Eq, Show, Generic)
+                  deriving (Eq, Ord, Show, Generic)
 
 newtype ContDefs = ContDefs { contDefs :: Rec [ContDef]}
                  deriving (Show, Generic)

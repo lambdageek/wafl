@@ -10,7 +10,10 @@ data Bind p t = Bind p t
   deriving (Show)
 
 newtype Var = Var  { varName :: T.Text }
-  deriving (Eq, Show)
+  deriving (Eq, Ord, Show)
+
+varNameS :: Var -> String
+varNameS = T.unpack . varName
 
 data Term =
   Jump Var Value LinearValue
