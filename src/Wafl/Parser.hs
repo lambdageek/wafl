@@ -14,8 +14,16 @@ import qualified Text.Megaparsec.Char.Lexer as L
   
 import Wafl.PreSyntax
 
-type ParserT = ParsecT Void T.Text
-type MonadParser = MonadParsec Void T.Text
+newtype ParserError = ParserError { parserErrorMsg :: T.Text } deriving (Eq, Ord, Show)
+
+instance ShowErrorComponent ParserError where
+  showErrorComponent = show . parserErrorMsg
+  errorComponentLen = fromIntegral . T.length . parserErrorMsg
+
+type ParserT = ParsecT ParserError T.Text
+type MonadParser = MonadParsec ParserError T.Text
+
+type ErrorBundle = ParseErrorBundle T.Text ParserError
 
 var :: MonadParser m => m Var
 var = Var <$> identifier
@@ -37,10 +45,12 @@ expr :: MonadParser m => m Expr
 expr = label "expression" exprParser
   where
     exprParser = addend
-    addend = mkAddend <$> factor <*> optional (plus *> factor)
+    addend = mkAddend <$> factor <*> optional ((,) <$> operator <*> factor)
     factor = value
-    plus = reservedOp "+"
-    mkAddend l (Just r) = EOp Add [l, r]
+    operator = plus -- <|> times
+    plus = reservedOp "+" *> pure Add
+    -- times = reservedOp "*"  *> pure Mult
+    mkAddend l (Just (op, r)) = EOp op [l, r]
     mkAddend l Nothing = EValue l
 
 term :: MonadParser m => m Term
@@ -92,5 +102,5 @@ identifier = (lexeme . try) (p >>= check)
   where
     p       = T.cons <$> L.letterChar <*> takeWhileP (Just "alphanumeric") isAlphaNum
     check x = if x `elem` rws
-                then fail $ "keyword " ++ show x ++ " cannot be an identifier"
+                then customFailure $ ParserError $ "keyword " <>  x <> " cannot be an identifier"
                 else return x

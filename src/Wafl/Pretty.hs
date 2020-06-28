@@ -1,8 +1,6 @@
 {-# language GeneralizedNewtypeDeriving, DataKinds, TypeFamilies, ViewPatterns #-}
 module Wafl.Pretty where
 
-import Data.Monoid
-
 import qualified Text.PrettyPrint.ANSI.Leijen as PP
 
 import Unbound.Generics.LocallyNameless.Alpha (Alpha)
